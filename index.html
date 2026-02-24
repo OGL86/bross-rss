@@ -1326,10 +1326,12 @@ function renderFeedStatus() {
   if (!grid) return;
   grid.innerHTML = RSS_FEEDS.map(feed => {
     const s = feedStatus[feed.name] || { status: 'loading', count: 0 };
+    const statusClass = ['ok', 'fail', 'loading'].includes(s.status) ? s.status : 'loading';
+    const statusText = s.status === 'ok' ? s.count + ' saker' : s.status === 'fail' ? 'feilet' : '...';
     return `<div class="feed-status-item">
-      <span class="feed-dot ${s.status}"></span>
-      <span>${feed.name}</span>
-      <span class="feed-count">${s.status === 'ok' ? s.count + ' saker' : s.status === 'fail' ? 'feilet' : '...'}</span>
+      <span class="feed-dot ${statusClass}"></span>
+      <span>${escapeHtml(feed.name)}</span>
+      <span class="feed-count">${escapeHtml(statusText)}</span>
     </div>`;
   }).join('');
 }
@@ -1416,17 +1418,18 @@ function isBookmarked(link) {
 
 // ── COPY TO CLIPBOARD ───────────────────────────────────────────────
 
-async function copyToClipboard(title, link) {
+async function copyToClipboard(title, link, triggerEl) {
   const text = `${title} - ${link}`;
   try {
     await navigator.clipboard.writeText(text);
-    // Visual feedback: briefly change icon
-    event.target.classList.add('copied');
-    event.target.textContent = '✓';
-    setTimeout(() => {
-      event.target.classList.remove('copied');
-      event.target.textContent = '📋';
-    }, 1500);
+    if (triggerEl) {
+      triggerEl.classList.add('copied');
+      triggerEl.textContent = '✓';
+      setTimeout(() => {
+        triggerEl.classList.remove('copied');
+        triggerEl.textContent = '📋';
+      }, 1500);
+    }
   } catch {
     // Fallback
     const ta = document.createElement('textarea');
@@ -1508,12 +1511,12 @@ function renderCard(article) {
   const bookmarked = isBookmarked(article.link);
   const bookmarkKey = article.link.replace(/\/$/, '').toLowerCase();
   const titleHtml = highlightText(article.title, searchQuery);
-  const thumbHtml = article.thumbnail ? `<img class="card-thumbnail" src="${sanitizeUrl(article.thumbnail)}" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
+  const thumbHtml = article.thumbnail ? `<img class="card-thumbnail" src="${sanitizeUrl(article.thumbnail)}" alt="" loading="lazy">` : '';
 
   return `
-    <div class="card${fireClass}" id="${article.id}">
+    <div class="card${fireClass}" id="${escapeAttr(article.id)}" data-article-id="${escapeAttr(article.id)}">
       <div class="card-body">
-        <div class="card-title"><a href="${safeLink}" target="_blank" rel="noopener noreferrer">${titleHtml}</a></div>
+        <div class="card-title"><a href="${escapeAttr(safeLink)}" target="_blank" rel="noopener noreferrer">${titleHtml}</a></div>
         <div class="card-meta">
           <span class="card-source">${faviconImg}${escapeHtml(article.source)}</span>
           <span class="card-category ${catInfo.css}">${catInfo.label}</span>
@@ -1521,12 +1524,12 @@ function renderCard(article) {
         </div>
         <div class="hype-section">
           <span class="hype-label">Hype</span>
-          <button class="hype-btn" onclick="adjustHype('${article.id}', -1)" aria-label="Senk hype">&minus;</button>
-          <span class="hype-badge ${badgeClass}" id="badge_${article.id}">${score}</span>
-          <button class="hype-btn" onclick="adjustHype('${article.id}', 1)" aria-label="Øk hype">+</button>
+          <button class="hype-btn" data-action="hype-down" data-id="${escapeAttr(article.id)}" aria-label="Senk hype">&minus;</button>
+          <span class="hype-badge ${badgeClass}" id="badge_${escapeAttr(article.id)}">${score}</span>
+          <button class="hype-btn" data-action="hype-up" data-id="${escapeAttr(article.id)}" aria-label="Øk hype">+</button>
           <div class="card-actions">
-            <button class="card-action-btn bookmark-star${bookmarked ? ' bookmarked' : ''}" data-bookmark-link="${bookmarkKey}" onclick="toggleBookmark('${safeLink}')" title="${bookmarked ? 'Fjern fra manus' : 'Lagre til manus'}" aria-label="Bokmerke">${bookmarked ? '★' : '☆'}</button>
-            <button class="card-action-btn" onclick="copyToClipboard('${escapeHtml(article.title).replace(/'/g, '\\&#39;')}', '${safeLink}')" title="Kopier til manus" aria-label="Kopier">📋</button>
+            <button class="card-action-btn bookmark-star${bookmarked ? ' bookmarked' : ''}" data-bookmark-link="${escapeAttr(bookmarkKey)}" data-action="bookmark" data-link="${escapeAttr(safeLink)}" title="${bookmarked ? 'Fjern fra manus' : 'Lagre til manus'}" aria-label="Bokmerke">${bookmarked ? '★' : '☆'}</button>
+            <button class="card-action-btn" data-action="copy" data-id="${escapeAttr(article.id)}" title="Kopier til manus" aria-label="Kopier">📋</button>
           </div>
         </div>
       </div>
@@ -1538,6 +1541,16 @@ function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str;
   return div.innerHTML;
+}
+
+/** Escape a string for safe use in HTML attributes */
+function escapeAttr(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
 
 /** Check if an article passes the active filters */
@@ -1569,9 +1582,9 @@ function renderColumnList(articles, listId, emptyMsg, timeBucket) {
 
   if (articles.length > INITIAL_SHOW_COUNT) {
     if (!showMoreState[timeBucket]) {
-      html += `<button class="show-more-btn" onclick="toggleShowMore('${timeBucket}')">Vis ${articles.length - INITIAL_SHOW_COUNT} flere ▼</button>`;
+      html += `<button class="show-more-btn" data-action="show-more" data-bucket="${escapeAttr(timeBucket)}">Vis ${articles.length - INITIAL_SHOW_COUNT} flere ▼</button>`;
     } else {
-      html += `<button class="show-more-btn" onclick="toggleShowMore('${timeBucket}')">Vis færre ▲</button>`;
+      html += `<button class="show-more-btn" data-action="show-more" data-bucket="${escapeAttr(timeBucket)}">Vis færre ▲</button>`;
     }
   }
 
@@ -1778,15 +1791,15 @@ function renderFavorites() {
     const faviconImg = faviconUrl ? `<img style="width:14px;height:14px;border-radius:2px;vertical-align:middle;margin-right:4px;" src="${faviconUrl}" alt="">` : '';
 
     return `
-      <div class="result-item">
+      <div class="result-item" data-article-id="${escapeAttr(art.id)}">
         <div class="result-rank" style="color: #ffd700;">${i + 1}</div>
         <div class="result-info">
-          <div class="result-title"><a href="${safeLink}" target="_blank" rel="noopener noreferrer">${escapeHtml(art.title)}</a></div>
+          <div class="result-title"><a href="${escapeAttr(safeLink)}" target="_blank" rel="noopener noreferrer">${escapeHtml(art.title)}</a></div>
           <div class="result-meta">${faviconImg}${escapeHtml(art.source)} — ${formatDate(art.pubDate)}</div>
         </div>
         <div class="result-actions">
-          <button class="result-action-btn" onclick="copyToClipboard('${escapeHtml(art.title).replace(/'/g, '\\&#39;')}', '${safeLink}')" title="Kopier">📋</button>
-          <button class="result-action-btn remove" onclick="removeFavorite('${safeLink}')" title="Fjern fra manus">✕</button>
+          <button class="result-action-btn" data-action="fav-copy" data-id="${escapeAttr(art.id)}" title="Kopier">📋</button>
+          <button class="result-action-btn remove" data-action="fav-remove" data-link="${escapeAttr(safeLink)}" title="Fjern fra manus">✕</button>
         </div>
       </div>`;
   }).join('');
@@ -1936,6 +1949,44 @@ document.addEventListener('visibilitychange', () => {
 
 // Go!
 init().then(() => startAutoRefresh());
+
+// ── DELEGATED EVENT LISTENERS ───────────────────────────────────────
+// All clicks on dynamically generated content are handled here instead
+// of inline onclick attributes (prevents XSS from RSS content).
+
+document.getElementById('gridContainer').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+
+  const action = btn.dataset.action;
+  const id = btn.dataset.id;
+
+  if (action === 'hype-down' || action === 'hype-up') {
+    const delta = action === 'hype-up' ? 1 : -1;
+    adjustHype(id, delta);
+  } else if (action === 'bookmark') {
+    toggleBookmark(btn.dataset.link);
+  } else if (action === 'copy') {
+    const art = allArticles.find(a => a.id === id);
+    if (art) copyToClipboard(art.title, sanitizeUrl(art.link), btn);
+  } else if (action === 'show-more') {
+    toggleShowMore(btn.dataset.bucket);
+  }
+});
+
+document.getElementById('resultsList').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+
+  const action = btn.dataset.action;
+
+  if (action === 'fav-copy') {
+    const art = allArticles.find(a => a.id === btn.dataset.id);
+    if (art) copyToClipboard(art.title, sanitizeUrl(art.link), btn);
+  } else if (action === 'fav-remove') {
+    removeFavorite(btn.dataset.link);
+  }
+});
 </script>
 
 </body>
