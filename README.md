@@ -1,0 +1,2 @@
+# bross-rss
+nintentdo -rss
