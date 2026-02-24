@@ -3,56 +3,83 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="BRÅSS! Studio Radar — Live nyhetsdashbord for Nintendo og videospill. Aggregerer 20 RSS-kilder i sanntid.">
+  <meta name="theme-color" content="#E60012">
+  <meta property="og:title" content="BRÅSS! Studio Radar">
+  <meta property="og:description" content="Live nyhetsdashbord for Nintendo og videospill podcast-produksjon.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔴</text></svg>">
   <title>BRÅSS! Studio Radar</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
     /* ===== RESET & BASE ===== */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    body {
-      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-      background: #121212;
-      color: #e0e0e0;
-      min-height: 100vh;
-      line-height: 1.5;
+    :root {
+      --bg-color: #111;
+      --card-bg: #1e1e1e;
+      --card-border: #2a2a2a;
+      --accent: #E60012;
+      --text-main: #e0e0e0;
+      --text-muted: #888;
+      --font-stack: 'Inter', system-ui, -apple-system, sans-serif;
     }
 
-    a { color: #fff; text-decoration: none; }
-    a:hover { color: #E60012; }
+    body {
+      font-family: var(--font-stack);
+      background: var(--bg-color);
+      color: var(--text-main);
+      min-height: 100vh;
+      line-height: 1.4;
+      font-size: 14px; /* Compact base size */
+    }
+
+    a { color: #fff; text-decoration: none; transition: color 0.2s; }
+    a:hover { color: var(--accent); }
 
     /* ===== HEADER ===== */
     .header {
-      background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
-      border-bottom: 3px solid #E60012;
-      padding: 1.2rem 2rem;
-      text-align: center;
+      background: rgba(18, 18, 18, 0.95);
+      border-bottom: 2px solid var(--accent);
+      padding: 0.8rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       position: sticky;
       top: 0;
       z-index: 100;
+      backdrop-filter: blur(10px);
     }
+
+    .header-branding { display: flex; align-items: baseline; gap: 1rem; }
 
     .header h1 {
-      font-size: 2.4rem;
+      font-size: 1.5rem;
       font-weight: 900;
-      letter-spacing: 3px;
       text-transform: uppercase;
+      letter-spacing: 1px;
       color: #fff;
+      line-height: 1;
     }
 
-    .header h1 span.accent { color: #E60012; }
+    .header h1 span.accent { color: var(--accent); }
 
     .header .subtitle {
-      font-size: 0.85rem;
-      color: #888;
-      margin-top: 0.2rem;
-      letter-spacing: 1px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      font-weight: 500;
     }
 
     /* ===== LOADING / STATUS ===== */
+    #status-bar-container { margin-left: auto; }
+    
     .status-bar {
-      text-align: center;
-      padding: 0.8rem;
-      font-size: 0.85rem;
-      color: #888;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
     }
 
     .status-bar.error { color: #ff5555; }
@@ -81,8 +108,16 @@
       margin: 0 auto;
     }
 
-    @media (max-width: 1100px) {
+    @media (max-width: 1100px) and (min-width: 700px) {
+      .grid-container { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 699px) {
       .grid-container { grid-template-columns: 1fr; }
+      .header h1 { font-size: 1.6rem; }
+      .filter-bar { padding: 0.4rem 0.8rem; }
+      .search-box { width: 100%; }
+      .status-row { flex-direction: column; gap: 0.5rem; }
     }
 
     .column {
@@ -540,7 +575,7 @@
   </header>
 
   <!-- STATUS BAR -->
-  <div class="status-bar" id="statusBar">
+  <div class="status-bar" id="statusBar" aria-live="polite">
     <span class="spinner"></span> Henter nyheter fra 20 kilder...
   </div>
 
@@ -580,7 +615,7 @@
   </div>
 
   <!-- THREE-COLUMN GRID -->
-  <div class="grid-container" id="gridContainer">
+  <div class="grid-container" id="gridContainer" aria-live="polite">
     <div class="column" id="colToday">
       <div class="column-header">
         🔴 Dagens <small>(siste 24t)</small>
@@ -908,6 +943,18 @@ function formatDate(dateStr) {
 let _idCounter = 0;
 function uid() { return 'art_' + (++_idCounter); }
 
+/** Sanitize a URL — only allow http/https links */
+function sanitizeUrl(url) {
+  if (!url) return '#';
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') return url;
+    return '#';
+  } catch {
+    return '#';
+  }
+}
+
 // ── RSS FETCHING ────────────────────────────────────────────────────
 
 async function fetchFeed(feed) {
@@ -1040,9 +1087,10 @@ function renderCard(article) {
   const score = getEffectiveHype(article);
   const badgeClass = hypeClass(score);
   const catInfo = CATEGORY_INFO[article.category] || CATEGORY_INFO.nyheter;
+  const safeLink = sanitizeUrl(article.link);
   return `
     <div class="card" id="${article.id}">
-      <div class="card-title"><a href="${article.link}" target="_blank" rel="noopener">${escapeHtml(article.title)}</a></div>
+      <div class="card-title"><a href="${safeLink}" target="_blank" rel="noopener noreferrer">${escapeHtml(article.title)}</a></div>
       <div class="card-meta">
         <span class="card-source">${escapeHtml(article.source)}</span>
         <span class="card-category ${catInfo.css}">${catInfo.label}</span>
@@ -1063,6 +1111,49 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
+/** Check if an article passes the active filters */
+function passesFilters(art) {
+  // Source group filter
+  if (activeSourceGroup !== 'all' && art.sourceGroup !== activeSourceGroup) return false;
+  // Category filter
+  if (activeCategory !== 'all' && art.category !== activeCategory) return false;
+  // Search filter
+  if (searchQuery.trim()) {
+    const q = searchQuery.toLowerCase();
+    const inTitle = art.title.toLowerCase().includes(q);
+    const inSource = art.source.toLowerCase().includes(q);
+    if (!inTitle && !inSource) return false;
+  }
+  return true;
+}
+
+function renderColumnList(articles, listId, emptyMsg, timeBucket) {
+  const listEl = document.getElementById(listId);
+  if (articles.length === 0) {
+    listEl.innerHTML = `<div class="empty-state">${emptyMsg}</div>`;
+    return;
+  }
+
+  const limit = showMoreState[timeBucket] ? articles.length : INITIAL_SHOW_COUNT;
+  const visible = articles.slice(0, limit);
+  let html = visible.map(renderCard).join('');
+
+  if (articles.length > INITIAL_SHOW_COUNT) {
+    if (!showMoreState[timeBucket]) {
+      html += `<button class="show-more-btn" onclick="toggleShowMore('${timeBucket}')">Vis ${articles.length - INITIAL_SHOW_COUNT} flere ▼</button>`;
+    } else {
+      html += `<button class="show-more-btn" onclick="toggleShowMore('${timeBucket}')">Vis færre ▲</button>`;
+    }
+  }
+
+  listEl.innerHTML = html;
+}
+
+function toggleShowMore(bucket) {
+  showMoreState[bucket] = !showMoreState[bucket];
+  renderColumns();
+}
+
 function renderColumns() {
   const todayList = [];
   const weekList = [];
@@ -1070,6 +1161,7 @@ function renderColumns() {
 
   for (const art of allArticles) {
     if (art.hidden) continue;
+    if (!passesFilters(art)) continue;
     const cat = timeCategory(art.pubDate);
     if (cat === 'today') todayList.push(art);
     else if (cat === 'week') weekList.push(art);
@@ -1088,12 +1180,9 @@ function renderColumns() {
   weekList.sort(sorter);
   monthList.sort(sorter);
 
-  document.getElementById('listToday').innerHTML =
-    todayList.length ? todayList.map(renderCard).join('') : '<div class="empty-state">Ingen nyheter siste 24 timer</div>';
-  document.getElementById('listWeek').innerHTML =
-    weekList.length ? weekList.map(renderCard).join('') : '<div class="empty-state">Ingen nyheter denne uken</div>';
-  document.getElementById('listMonth').innerHTML =
-    monthList.length ? monthList.map(renderCard).join('') : '<div class="empty-state">Ingen nyheter denne måneden</div>';
+  renderColumnList(todayList, 'listToday', 'Ingen nyheter siste 24 timer', 'today');
+  renderColumnList(weekList, 'listWeek', 'Ingen nyheter denne uken', 'week');
+  renderColumnList(monthList, 'listMonth', 'Ingen nyheter denne måneden', 'month');
 
   document.getElementById('countToday').textContent = todayList.length;
   document.getElementById('countWeek').textContent = weekList.length;
@@ -1173,7 +1262,7 @@ async function manualRefresh() {
 // ── MERGE & RANK ────────────────────────────────────────────────────
 
 function mergeAndRank() {
-  const visible = allArticles.filter(a => !a.hidden);
+  const visible = allArticles.filter(a => !a.hidden && passesFilters(a));
   visible.sort((a, b) => {
     const diff = getEffectiveHype(b) - getEffectiveHype(a);
     if (diff !== 0) return diff;
@@ -1199,7 +1288,7 @@ function mergeAndRank() {
         <div class="result-item">
           <div class="result-rank ${rankClass}">${rank}</div>
           <div class="result-info">
-            <div class="result-title"><a href="${art.link}" target="_blank" rel="noopener">${escapeHtml(art.title)}</a></div>
+            <div class="result-title"><a href="${sanitizeUrl(art.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(art.title)}</a></div>
             <div class="result-meta">${escapeHtml(art.source)} — ${formatDate(art.pubDate)}</div>
           </div>
           <div class="result-hype">
@@ -1280,8 +1369,29 @@ async function init() {
   }
 }
 
+// ── AUTO-REFRESH ────────────────────────────────────────────────────
+const AUTO_REFRESH_INTERVAL = 10 * 60 * 1000; // 10 minutes
+let autoRefreshTimer = null;
+
+function startAutoRefresh() {
+  if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+  autoRefreshTimer = setInterval(async () => {
+    console.log('Auto-refresh triggered');
+    await init();
+  }, AUTO_REFRESH_INTERVAL);
+}
+
+// Pause auto-refresh when tab is hidden, resume when visible
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    if (autoRefreshTimer) { clearInterval(autoRefreshTimer); autoRefreshTimer = null; }
+  } else {
+    startAutoRefresh();
+  }
+});
+
 // Go!
-init();
+init().then(() => startAutoRefresh());
 </script>
 
 </body>
