@@ -152,12 +152,15 @@
 
     /* ===== NEWS CARDS ===== */
     .card {
-      background: #252525;
+      background: linear-gradient(145deg, #252525, #1e1e1e);
       border-radius: 8px;
       padding: 0.85rem 1rem;
       margin-bottom: 0.7rem;
       border-left: 3px solid var(--card-border);
-      transition: border-color 0.2s, transform 0.15s;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+      display: flex;
+      gap: 0.6rem;
     }
 
     .card:hover {
@@ -165,9 +168,29 @@
       transform: translateX(3px);
     }
 
+    .card.fire-card {
+      animation: fire-glow 2s ease-in-out infinite;
+    }
+
+    @keyframes fire-glow {
+      0%, 100% { box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+      50% { box-shadow: 0 4px 16px rgba(230, 0, 18, 0.35), 0 0 8px rgba(230, 0, 18, 0.2); }
+    }
+
+    .card-body { flex: 1; min-width: 0; }
+
+    .card-thumbnail {
+      width: 60px;
+      height: 60px;
+      border-radius: 6px;
+      object-fit: cover;
+      flex-shrink: 0;
+      background: #333;
+    }
+
     .card-title {
       font-size: 0.92rem;
-      font-weight: 600;
+      font-weight: 700;
       line-height: 1.35;
       margin-bottom: 0.35rem;
     }
@@ -179,11 +202,14 @@
       align-items: center;
       gap: 0.6rem;
       font-size: 0.75rem;
-      color: #999;
+      color: #666;
       flex-wrap: wrap;
     }
 
     .card-source {
+      display: flex;
+      align-items: center;
+      gap: 4px;
       background: #333;
       color: #ccc;
       padding: 1px 7px;
@@ -192,7 +218,13 @@
       font-weight: 600;
     }
 
-    .card-date { color: #777; }
+    .card-source img.favicon {
+      width: 14px;
+      height: 14px;
+      border-radius: 2px;
+    }
+
+    .card-date { color: #555; }
 
     /* ===== HYPE SCORE ===== */
     .hype-section {
@@ -230,9 +262,11 @@
       color: #ccc;
       border: none;
       border-radius: 4px;
-      width: 26px;
-      height: 26px;
-      font-size: 1rem;
+      min-width: 44px;
+      min-height: 44px;
+      width: 44px;
+      height: 44px;
+      font-size: 1.1rem;
       font-weight: 700;
       cursor: pointer;
       display: flex;
@@ -240,6 +274,10 @@
       justify-content: center;
       transition: background 0.15s, color 0.15s;
       line-height: 1;
+    }
+
+    @media (min-width: 700px) {
+      .hype-btn { min-width: 26px; min-height: 26px; width: 26px; height: 26px; font-size: 1rem; }
     }
 
     .hype-btn:hover { background: var(--accent); color: #fff; }
@@ -567,6 +605,144 @@
       border-top: 1px solid var(--card-bg);
     }
 
+    /* ===== CARD ACTION BUTTONS ===== */
+    .card-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      margin-left: auto;
+    }
+
+    .card-action-btn {
+      background: none;
+      border: 1px solid transparent;
+      color: #555;
+      cursor: pointer;
+      font-size: 0.9rem;
+      padding: 2px 5px;
+      border-radius: 4px;
+      transition: all 0.15s;
+      line-height: 1;
+    }
+
+    .card-action-btn:hover { color: var(--accent); border-color: #444; }
+    .card-action-btn.bookmarked { color: #ffd700; }
+    .card-action-btn.copied { color: #4caf50; }
+
+    /* ===== SEARCH HIGHLIGHT ===== */
+    mark {
+      background: rgba(230, 0, 18, 0.3);
+      color: white;
+      font-weight: bold;
+      border-radius: 2px;
+      padding: 0 2px;
+    }
+
+    /* ===== HIGH CONTRAST MODE ===== */
+    body.high-contrast {
+      --bg-color: #ffffff;
+      --card-bg: #f0f0f0;
+      --card-border: #ccc;
+      --text-main: #000000;
+      --text-muted: #444;
+    }
+
+    body.high-contrast a { color: #000; }
+    body.high-contrast a:hover { color: var(--accent); }
+    body.high-contrast .header { background: rgba(240, 240, 240, 0.95); border-bottom-color: var(--accent); }
+    body.high-contrast .header h1 { color: #000; }
+    body.high-contrast .card { background: linear-gradient(145deg, #fff, #f5f5f5); border-left-color: #ccc; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    body.high-contrast .card-title a { color: #111; }
+    body.high-contrast .card-source { background: #ddd; color: #333; }
+    body.high-contrast .filter-chip { background: #e0e0e0; color: #333; border-color: #ccc; }
+    body.high-contrast .filter-chip.active { background: var(--accent); color: #fff; }
+    body.high-contrast .toolbar { background: rgba(240, 240, 240, 0.9); border-bottom-color: #ccc; }
+    body.high-contrast .search-box { background: #fff; border-color: #ccc; color: #000; }
+    body.high-contrast .hype-btn { background: #ddd; color: #333; }
+    body.high-contrast .merge-btn { color: #fff; }
+    body.high-contrast .results-box { background: linear-gradient(135deg, #f5f5f5, #eee); }
+    body.high-contrast .result-item { border-bottom-color: #ddd; }
+    body.high-contrast .result-item:hover { background: #e8e8e8; }
+    body.high-contrast .footer { color: #888; border-top-color: #ddd; }
+    body.high-contrast mark { background: rgba(230, 0, 18, 0.2); color: #000; }
+
+    .contrast-toggle {
+      background: none;
+      border: 1px solid #444;
+      color: var(--text-muted);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .contrast-toggle:hover { border-color: var(--accent); color: var(--accent); }
+    body.high-contrast .contrast-toggle { border-color: #999; color: #333; }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 200;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    .modal-overlay.visible { display: flex; }
+
+    .modal-box {
+      background: var(--card-bg);
+      border: 2px solid var(--accent);
+      border-radius: 14px;
+      padding: 1.5rem;
+      max-width: 800px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      animation: slideUp 0.3s ease-out;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.4rem;
+      cursor: pointer;
+      transition: color 0.15s;
+    }
+
+    .modal-close:hover { color: var(--accent); }
+
+    body.high-contrast .modal-box { background: #f5f5f5; }
+    body.high-contrast .modal-overlay { background: rgba(0,0,0,0.4); }
+
+    /* ===== ARCHIVE COLUMN ===== */
+    .column.archive-hidden { display: none; }
+
+    .grid-container.two-col {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (max-width: 699px) {
+      .grid-container.two-col { grid-template-columns: 1fr; }
+    }
+
     .footer .cache-btn {
       margin-top: 0.5rem;
       background: #333;
@@ -592,22 +768,17 @@
     </div>
     <div id="status-bar-container">
       <div class="status-bar" id="statusBar" aria-live="polite">
-        <span class="spinner"></span> Henter nyheter fra 26 kilder...
+        <span class="spinner"></span> Henter nyheter fra 33 kilder...
       </div>
     </div>
+    <button class="contrast-toggle" onclick="toggleHighContrast()" title="Bytt mellom mørk og lys modus">🌓 Kontrast</button>
   </header>
 
-  <!-- TOOLBAR: search, refresh, feed toggle -->
+  <!-- TOOLBAR: search, refresh -->
   <div class="toolbar" id="statusRow" style="display:none;">
     <input type="text" class="search-box" id="searchBox" placeholder="🔍 Søk i nyheter..." oninput="onSearchInput()">
     <span class="last-updated" id="lastUpdated"></span>
     <button class="refresh-btn" id="refreshBtn" onclick="manualRefresh()">↻ Oppdater nå</button>
-    <button class="feed-status-toggle" id="feedToggle" onclick="toggleFeedPanel()">Vis kildestatus</button>
-  </div>
-
-  <!-- FEED STATUS PANEL -->
-  <div class="feed-status-panel" id="feedStatusPanel">
-    <div class="feed-status-grid" id="feedStatusGrid"></div>
   </div>
 
   <!-- FILTER BAR -->
@@ -630,10 +801,14 @@
       <button class="filter-chip" data-filter-type="category" data-value="bransje" onclick="toggleCategoryFilter(this)">📊 Bransje</button>
       <button class="filter-chip" data-filter-type="category" data-value="salg" onclick="toggleCategoryFilter(this)">💰 Salg</button>
     </div>
+    <div class="filter-divider"></div>
+    <div class="filter-group">
+      <button class="filter-chip" id="archiveToggleChip" onclick="toggleArchiveColumn()">📁 Vis eldre saker (arkiv)</button>
+    </div>
   </div>
 
   <!-- THREE-COLUMN GRID -->
-  <div class="grid-container" id="gridContainer" aria-live="polite">
+  <div class="grid-container two-col" id="gridContainer" aria-live="polite">
     <div class="column" id="colToday">
       <div class="column-header">
         🔴 Dagens <small>(siste 24t)</small>
@@ -648,7 +823,7 @@
       </div>
       <div class="card-list" id="listWeek"></div>
     </div>
-    <div class="column" id="colMonth">
+    <div class="column archive-hidden" id="colMonth">
       <div class="column-header">
         📅 Månedens <small>(siste 30 dager)</small>
         <span class="count" id="countMonth">0</span>
@@ -676,7 +851,19 @@
   <div class="footer">
     BRÅSS! Studio Radar &mdash; Gratis verktøy for podcast-produksjon &mdash; Drevet av RSS &amp; Vanilla JS
     <br>
+    <button class="cache-btn" onclick="openSettingsModal()" title="Åpne innstillinger">⚙️ Innstillinger / Kildestatus</button>
     <button class="cache-btn" onclick="clearCache()" title="Sletter alle lagrede nyheter fra nettleseren">🗑️ Tøm lokal cache</button>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div class="modal-overlay" id="settingsModal" onclick="closeSettingsModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <span>⚙️ Kildestatus</span>
+        <button class="modal-close" onclick="closeSettingsModal()">&times;</button>
+      </div>
+      <div class="feed-status-grid" id="feedStatusGrid"></div>
+    </div>
   </div>
 
 <script>
@@ -706,7 +893,7 @@ const RSS_FEEDS = [
   { url: 'https://www.gamereactor.no/rss/rss.php', name: 'Gamereactor NO', group: 'no' },
   { url: 'https://itavisen.no/kategori/spill/feed/', name: 'ITavisen', group: 'no' },
   { url: 'https://www.youtube.com/feeds/videos.xml?channel_id=UCv_9_p_pS06Yv_3_n4f47pA', name: 'Level Up Norge', group: 'no' },
-  // 🧩 Nisje-kilder (8)
+  // 🧩 Nisje-kilder (15)
   { url: 'https://nintendo.com/whatsnew/rss', name: 'Nintendo Offisiell', group: 'niche' },
   { url: 'https://www.destructoid.com/feed/', name: 'Destructoid', group: 'niche' },
   { url: 'https://www.siliconera.com/feed/', name: 'Siliconera', group: 'niche' },
@@ -715,6 +902,13 @@ const RSS_FEEDS = [
   { url: 'https://nintendosoup.com/feed/', name: 'NintendoSoup', group: 'niche' },
   { url: 'https://www.famitsu.com/feed/', name: 'Famitsu', group: 'niche' },
   { url: 'https://www.reddit.com/r/NintendoSwitch/.rss', name: 'r/NintendoSwitch', group: 'niche' },
+  { url: 'https://www.reddit.com/r/nintendo/.rss', name: 'r/nintendo', group: 'niche' },
+  { url: 'https://www.reddit.com/r/NintendoSwitch2/.rss', name: 'r/NintendoSwitch2', group: 'niche' },
+  { url: 'https://www.reddit.com/r/casualnintendo/.rss', name: 'r/casualnintendo', group: 'niche' },
+  { url: 'https://www.reddit.com/r/Zelda/.rss', name: 'r/Zelda', group: 'niche' },
+  { url: 'https://www.reddit.com/r/pokemon/.rss', name: 'r/pokemon', group: 'niche' },
+  { url: 'https://www.reddit.com/r/SmashBrosUltimate/.rss', name: 'r/SmashBrosUltimate', group: 'niche' },
+  { url: 'https://www.reddit.com/r/Switch/.rss', name: 'r/Switch', group: 'niche' },
 ];
 
 const RSS2JSON_BASE = 'https://api.rss2json.com/v1/api.json?rss_url=';
@@ -778,7 +972,9 @@ let activeSourceGroup = 'all'; // 'all' | 'int' | 'no' | 'niche'
 let activeCategory = 'all';    // 'all' | 'rykter' | 'anmeldelse' | etc.
 let searchQuery = '';           // current search text
 let showMoreState = { today: false, week: false, month: false };
+let archiveVisible = false;
 const INITIAL_SHOW_COUNT = 8;
+const BOOKMARKS_KEY = 'brass_radar_bookmarks';
 
 // ── LOCAL STORAGE (CACHE) ───────────────────────────────────────────
 
@@ -794,6 +990,7 @@ function saveToCache(articles) {
       category: a.category,
       autoHype: a.autoHype,
       manualHype: a.manualHype,
+      thumbnail: a.thumbnail || '',
     }));
     localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
   } catch (e) {
@@ -818,6 +1015,7 @@ function loadFromCache() {
       category: a.category || detectCategory(a.title || '', a.source || ''),
       autoHype: a.autoHype || 3,
       manualHype: a.manualHype ?? null,
+      thumbnail: a.thumbnail || '',
       hidden: false,
     }));
   } catch (e) {
@@ -988,18 +1186,26 @@ async function fetchFeed(feed) {
     const data = await res.json();
     if (data.status !== 'ok') throw new Error(data.message || 'RSS Parse Error');
 
-    return (data.items || []).map(item => ({
-      id: uid(),
-      title: (item.title || '').trim(),
-      link: item.link || '#',
-      pubDate: item.pubDate || '',
-      source: feed.name,
-      sourceGroup: feed.group,
-      category: detectCategory(item.title || '', feed.name),
-      autoHype: calcAutoHype(item.title || ''),
-      manualHype: null, // null = use autoHype
-      hidden: false,
-    }));
+    return (data.items || []).map(item => {
+      // Try to extract thumbnail from enclosure or thumbnail field
+      let thumb = '';
+      if (item.enclosure && item.enclosure.link) thumb = item.enclosure.link;
+      else if (item.thumbnail) thumb = item.thumbnail;
+
+      return {
+        id: uid(),
+        title: (item.title || '').trim(),
+        link: item.link || '#',
+        pubDate: item.pubDate || '',
+        source: feed.name,
+        sourceGroup: feed.group,
+        category: detectCategory(item.title || '', feed.name),
+        autoHype: calcAutoHype(item.title || ''),
+        manualHype: null,
+        thumbnail: thumb,
+        hidden: false,
+      };
+    });
   } catch (err) {
     console.warn(`Feil ved henting av ${feed.name}:`, err);
     return [];
@@ -1100,6 +1306,117 @@ function removeDuplicates(articles) {
   return articles;
 }
 
+// ── BOOKMARKS ───────────────────────────────────────────────────────
+
+function loadBookmarks() {
+  try {
+    const raw = localStorage.getItem(BOOKMARKS_KEY);
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch { return new Set(); }
+}
+
+function saveBookmarks(set) {
+  localStorage.setItem(BOOKMARKS_KEY, JSON.stringify([...set]));
+}
+
+function toggleBookmark(articleLink) {
+  const bookmarks = loadBookmarks();
+  const key = articleLink.replace(/\/$/, '').toLowerCase();
+  if (bookmarks.has(key)) {
+    bookmarks.delete(key);
+  } else {
+    bookmarks.add(key);
+  }
+  saveBookmarks(bookmarks);
+  // Update button in-place
+  const btn = document.querySelector(`[data-bookmark-link="${CSS.escape(key)}"]`);
+  if (btn) {
+    btn.classList.toggle('bookmarked', bookmarks.has(key));
+    btn.title = bookmarks.has(key) ? 'Fjern bokmerke' : 'Lagre til manus';
+  }
+}
+
+function isBookmarked(link) {
+  return loadBookmarks().has(link.replace(/\/$/, '').toLowerCase());
+}
+
+// ── COPY TO CLIPBOARD ───────────────────────────────────────────────
+
+async function copyToClipboard(title, link) {
+  const text = `${title} - ${link}`;
+  try {
+    await navigator.clipboard.writeText(text);
+    // Visual feedback: briefly change icon
+    event.target.classList.add('copied');
+    event.target.textContent = '✓';
+    setTimeout(() => {
+      event.target.classList.remove('copied');
+      event.target.textContent = '📋';
+    }, 1500);
+  } catch {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+}
+
+// ── FAVICON HELPER ──────────────────────────────────────────────────
+
+function getFaviconUrl(source) {
+  const domainMap = {
+    'Nintendo Life': 'nintendolife.com',
+    'Nintendo Everything': 'nintendoeverything.com',
+    'VGC': 'videogameschronicle.com',
+    'Eurogamer': 'eurogamer.net',
+    'IGN': 'ign.com',
+    'Gematsu': 'gematsu.com',
+    'GoNintendo': 'gonintendo.com',
+    'Kotaku': 'kotaku.com',
+    'GamesIndustry.biz': 'gamesindustry.biz',
+    'Polygon': 'polygon.com',
+    'My Nintendo News': 'mynintendonews.com',
+    'Nintendo Insider': 'nintendoinsider.com',
+    'GamesRadar+': 'gamesradar.com',
+    'Pressfire.no': 'pressfire.no',
+    'Gamer.no': 'gamer.no',
+    'Gamereactor NO': 'gamereactor.no',
+    'ITavisen': 'itavisen.no',
+    'Level Up Norge': 'youtube.com',
+    'Nintendo Offisiell': 'nintendo.com',
+    'Destructoid': 'destructoid.com',
+    'Siliconera': 'siliconera.com',
+    'The Verge': 'theverge.com',
+    'Pocket Gamer': 'pocketgamer.com',
+    'NintendoSoup': 'nintendosoup.com',
+    'Famitsu': 'famitsu.com',
+    'r/NintendoSwitch': 'reddit.com',
+    'r/nintendo': 'reddit.com',
+    'r/NintendoSwitch2': 'reddit.com',
+    'r/casualnintendo': 'reddit.com',
+    'r/Zelda': 'reddit.com',
+    'r/pokemon': 'reddit.com',
+    'r/SmashBrosUltimate': 'reddit.com',
+    'r/Switch': 'reddit.com',
+  };
+  const domain = domainMap[source] || '';
+  if (!domain) return '';
+  return `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+}
+
+// ── SEARCH HIGHLIGHTING ─────────────────────────────────────────────
+
+function highlightText(text, query) {
+  if (!query || !query.trim()) return escapeHtml(text);
+  const escaped = escapeHtml(text);
+  const q = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${q})`, 'gi');
+  return escaped.replace(regex, '<mark>$1</mark>');
+}
+
 // ── RENDERING ───────────────────────────────────────────────────────
 
 function getEffectiveHype(article) {
@@ -1111,20 +1428,35 @@ function renderCard(article) {
   const badgeClass = hypeClass(score);
   const catInfo = CATEGORY_INFO[article.category] || CATEGORY_INFO.nyheter;
   const safeLink = sanitizeUrl(article.link);
+  const fireClass = score >= 8 ? ' fire-card' : '';
+  const faviconUrl = getFaviconUrl(article.source);
+  const faviconImg = faviconUrl ? `<img class="favicon" src="${faviconUrl}" alt="" loading="lazy">` : '';
+  const bookmarked = isBookmarked(article.link);
+  const bookmarkKey = article.link.replace(/\/$/, '').toLowerCase();
+  const titleHtml = highlightText(article.title, searchQuery);
+  const thumbHtml = article.thumbnail ? `<img class="card-thumbnail" src="${sanitizeUrl(article.thumbnail)}" alt="" loading="lazy" onerror="this.style.display='none'">` : '';
+
   return `
-    <div class="card" id="${article.id}">
-      <div class="card-title"><a href="${safeLink}" target="_blank" rel="noopener noreferrer">${escapeHtml(article.title)}</a></div>
-      <div class="card-meta">
-        <span class="card-source">${escapeHtml(article.source)}</span>
-        <span class="card-category ${catInfo.css}">${catInfo.label}</span>
-        <span class="card-date">${formatDate(article.pubDate)}</span>
+    <div class="card${fireClass}" id="${article.id}">
+      <div class="card-body">
+        <div class="card-title"><a href="${safeLink}" target="_blank" rel="noopener noreferrer">${titleHtml}</a></div>
+        <div class="card-meta">
+          <span class="card-source">${faviconImg}${escapeHtml(article.source)}</span>
+          <span class="card-category ${catInfo.css}">${catInfo.label}</span>
+          <span class="card-date">${formatDate(article.pubDate)}</span>
+        </div>
+        <div class="hype-section">
+          <span class="hype-label">Hype:</span>
+          <button class="hype-btn" onclick="adjustHype('${article.id}', -1)" aria-label="Senk hype">−</button>
+          <span class="hype-badge ${badgeClass}" id="badge_${article.id}">${score}</span>
+          <button class="hype-btn" onclick="adjustHype('${article.id}', 1)" aria-label="Øk hype">+</button>
+          <div class="card-actions">
+            <button class="card-action-btn${bookmarked ? ' bookmarked' : ''}" data-bookmark-link="${bookmarkKey}" onclick="toggleBookmark('${safeLink}')" title="${bookmarked ? 'Fjern bokmerke' : 'Lagre til manus'}" aria-label="Bokmerke">⭐</button>
+            <button class="card-action-btn" onclick="copyToClipboard('${escapeHtml(article.title).replace(/'/g, '\\&#39;')}', '${safeLink}')" title="Kopier til manus" aria-label="Kopier">📋</button>
+          </div>
+        </div>
       </div>
-      <div class="hype-section">
-        <span class="hype-label">Hype:</span>
-        <button class="hype-btn" onclick="adjustHype('${article.id}', -1)" aria-label="Senk hype">−</button>
-        <span class="hype-badge ${badgeClass}" id="badge_${article.id}">${score}</span>
-        <button class="hype-btn" onclick="adjustHype('${article.id}', 1)" aria-label="Øk hype">+</button>
-      </div>
+      ${thumbHtml}
     </div>`;
 }
 
@@ -1192,11 +1524,11 @@ function renderColumns() {
     // 'old' articles are silently omitted
   }
 
-  // Sort each bucket: highest hype first, then newest
+  // Sort each bucket: newest first, then hype as tiebreaker
   const sorter = (a, b) => {
-    const diff = getEffectiveHype(b) - getEffectiveHype(a);
-    if (diff !== 0) return diff;
-    return new Date(b.pubDate) - new Date(a.pubDate);
+    const dateDiff = new Date(b.pubDate) - new Date(a.pubDate);
+    if (dateDiff !== 0) return dateDiff;
+    return getEffectiveHype(b) - getEffectiveHype(a);
   };
 
   todayList.sort(sorter);
@@ -1267,10 +1599,47 @@ function onSearchInput() {
 }
 
 function toggleFeedPanel() {
-  const panel = document.getElementById('feedStatusPanel');
-  const btn = document.getElementById('feedToggle');
-  panel.classList.toggle('visible');
-  btn.textContent = panel.classList.contains('visible') ? 'Skjul kildestatus' : 'Vis kildestatus';
+  openSettingsModal();
+}
+
+function openSettingsModal() {
+  document.getElementById('settingsModal').classList.add('visible');
+}
+
+function closeSettingsModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('settingsModal').classList.remove('visible');
+}
+
+// ── HIGH CONTRAST ───────────────────────────────────────────────────
+
+function toggleHighContrast() {
+  document.body.classList.toggle('high-contrast');
+  const isHC = document.body.classList.contains('high-contrast');
+  localStorage.setItem('brass_high_contrast', isHC ? '1' : '0');
+}
+
+function loadHighContrastPref() {
+  if (localStorage.getItem('brass_high_contrast') === '1') {
+    document.body.classList.add('high-contrast');
+  }
+}
+
+loadHighContrastPref();
+
+// ── ARCHIVE TOGGLE ──────────────────────────────────────────────────
+
+function toggleArchiveColumn() {
+  archiveVisible = !archiveVisible;
+  const col = document.getElementById('colMonth');
+  const grid = document.getElementById('gridContainer');
+  const chip = document.getElementById('archiveToggleChip');
+
+  col.classList.toggle('archive-hidden', !archiveVisible);
+  grid.classList.toggle('two-col', !archiveVisible);
+
+  chip.classList.toggle('active', archiveVisible);
+  chip.textContent = archiveVisible ? '📁 Skjul arkiv' : '📁 Vis eldre saker (arkiv)';
 }
 
 async function manualRefresh() {
@@ -1287,9 +1656,9 @@ async function manualRefresh() {
 function mergeAndRank() {
   const visible = allArticles.filter(a => !a.hidden && passesFilters(a));
   visible.sort((a, b) => {
-    const diff = getEffectiveHype(b) - getEffectiveHype(a);
-    if (diff !== 0) return diff;
-    return new Date(b.pubDate) - new Date(a.pubDate);
+    const dateDiff = new Date(b.pubDate) - new Date(a.pubDate);
+    if (dateDiff !== 0) return dateDiff;
+    return getEffectiveHype(b) - getEffectiveHype(a);
   });
 
   const top15 = visible.slice(0, 15);
