@@ -231,7 +231,7 @@
       display: flex;
       align-items: center;
       gap: 0.4rem;
-      margin-top: 0.5rem;
+      margin-top: 0.4rem;
     }
 
     .hype-badge {
@@ -282,18 +282,18 @@
 
     .hype-btn:hover { background: var(--accent); color: #fff; }
 
-    /* ===== MERGE BUTTON ===== */
-    .merge-section {
+    /* ===== FAVORITES BUTTON ===== */
+    .favorites-section {
       text-align: center;
-      padding: 2rem 1rem;
+      padding: 1.5rem 1rem;
     }
 
-    .merge-btn {
+    .favorites-btn {
       background: var(--accent);
       color: #fff;
       border: none;
-      padding: 1rem 2.5rem;
-      font-size: 1.25rem;
+      padding: 0.8rem 2rem;
+      font-size: 1.1rem;
       font-weight: 800;
       border-radius: 12px;
       cursor: pointer;
@@ -303,14 +303,22 @@
       box-shadow: 0 4px 20px rgba(230, 0, 18, 0.4);
     }
 
-    .merge-btn:hover {
+    .favorites-btn:hover {
       transform: scale(1.04);
       box-shadow: 0 6px 30px rgba(230, 0, 18, 0.6);
     }
 
-    .merge-btn:active { transform: scale(0.97); }
+    .favorites-btn:active { transform: scale(0.97); }
 
-    /* ===== TOP 15 RESULTS ===== */
+    .favorites-btn .fav-count {
+      background: rgba(255,255,255,0.25);
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      margin-left: 0.5rem;
+    }
+
+    /* ===== FAVORITES PANEL ===== */
     .results-container {
       max-width: 900px;
       margin: 0 auto 3rem;
@@ -357,16 +365,12 @@
     .result-item:last-child { border-bottom: none; }
 
     .result-rank {
-      font-size: 1.4rem;
+      font-size: 1.1rem;
       font-weight: 900;
       color: var(--accent);
-      min-width: 36px;
+      min-width: 28px;
       text-align: center;
     }
-
-    .result-rank.gold { color: #ffd700; }
-    .result-rank.silver { color: #c0c0c0; }
-    .result-rank.bronze { color: #cd7f32; }
 
     .result-info { flex: 1; }
 
@@ -382,12 +386,54 @@
       margin-top: 0.15rem;
     }
 
-    .result-hype {
-      font-size: 1.1rem;
-      font-weight: 800;
-      min-width: 40px;
-      text-align: center;
+    .result-actions {
+      display: flex;
+      gap: 0.3rem;
     }
+
+    .result-action-btn {
+      background: #333;
+      border: none;
+      color: #999;
+      cursor: pointer;
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      border-radius: 4px;
+      transition: all 0.15s;
+    }
+
+    .result-action-btn:hover { background: var(--accent); color: #fff; }
+    .result-action-btn.remove:hover { background: #c0392b; }
+
+    body.high-contrast .result-action-btn { background: #ddd; color: #333; }
+
+    .favorites-empty {
+      text-align: center;
+      color: #666;
+      padding: 2rem;
+      font-size: 0.9rem;
+    }
+
+    .favorites-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .favorites-toolbar button {
+      background: #333;
+      border: none;
+      color: #ccc;
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .favorites-toolbar button:hover { background: var(--accent); color: #fff; }
+    body.high-contrast .favorites-toolbar button { background: #ddd; color: #333; }
 
     /* ===== EMPTY STATE ===== */
     .empty-state {
@@ -470,28 +516,7 @@
     .cat-salg       { background: #6b2a4a; color: #ff88bb; }
     .cat-video      { background: #4a2a2a; color: #ff8888; }
 
-    /* ===== FEED STATUS ===== */
-    .feed-status-toggle {
-      background: none;
-      border: 1px solid #333;
-      color: #666;
-      padding: 3px 10px;
-      border-radius: 6px;
-      font-size: 0.7rem;
-      cursor: pointer;
-      margin-left: auto;
-    }
-
-    .feed-status-toggle:hover { color: #ccc; border-color: #555; }
-
-    .feed-status-panel {
-      max-width: 1600px;
-      margin: 0 auto;
-      padding: 0 1.5rem;
-      display: none;
-    }
-
-    .feed-status-panel.visible { display: block; }
+    /* ===== FEED STATUS (modal) ===== */
 
     .feed-status-grid {
       display: grid;
@@ -659,7 +684,7 @@
     body.high-contrast .toolbar { background: rgba(240, 240, 240, 0.9); border-bottom-color: #ccc; }
     body.high-contrast .search-box { background: #fff; border-color: #ccc; color: #000; }
     body.high-contrast .hype-btn { background: #ddd; color: #333; }
-    body.high-contrast .merge-btn { color: #fff; }
+    body.high-contrast .favorites-btn { color: #fff; }
     body.high-contrast .results-box { background: linear-gradient(135deg, #f5f5f5, #eee); }
     body.high-contrast .result-item { border-bottom-color: #ddd; }
     body.high-contrast .result-item:hover { background: #e8e8e8; }
@@ -832,17 +857,21 @@
     </div>
   </div>
 
-  <!-- MERGE BUTTON -->
-  <div class="merge-section">
-    <button class="merge-btn" id="mergeBtn" onclick="mergeAndRank()">
-      Slå sammen og ranger etter Hype! 🔥
+  <!-- FAVORITES BUTTON -->
+  <div class="favorites-section">
+    <button class="favorites-btn" id="favoritesBtn" onclick="toggleFavoritesPanel()">
+      ⭐ Vis Manus / Favoritter <span class="fav-count" id="favCount">0</span>
     </button>
   </div>
 
-  <!-- TOP 15 RESULTS -->
+  <!-- FAVORITES PANEL -->
   <div class="results-container" id="resultsContainer">
     <div class="results-box">
-      <div class="results-header">🔥 Topp 15 — Hypede Nyheter 🔥</div>
+      <div class="results-header">⭐ Manus — Lagrede Saker ⭐</div>
+      <div class="favorites-toolbar">
+        <button onclick="copyAllFavorites()" title="Kopier alle til utklippstavlen">📋 Kopier alle</button>
+        <button onclick="clearAllFavorites()" class="remove" title="Fjern alle favoritter">🗑️ Tøm manus</button>
+      </div>
       <div id="resultsList"></div>
     </div>
   </div>
@@ -1332,8 +1361,12 @@ function toggleBookmark(articleLink) {
   const btn = document.querySelector(`[data-bookmark-link="${CSS.escape(key)}"]`);
   if (btn) {
     btn.classList.toggle('bookmarked', bookmarks.has(key));
-    btn.title = bookmarks.has(key) ? 'Fjern bokmerke' : 'Lagre til manus';
+    btn.title = bookmarks.has(key) ? 'Fjern fra manus' : 'Lagre til manus';
   }
+  updateFavCount();
+  // If favorites panel is open, refresh it
+  const container = document.getElementById('resultsContainer');
+  if (container.classList.contains('visible')) renderFavorites();
 }
 
 function isBookmarked(link) {
@@ -1651,51 +1684,126 @@ async function manualRefresh() {
   btn.disabled = false;
 }
 
-// ── MERGE & RANK ────────────────────────────────────────────────────
+// ── FAVORITES PANEL ─────────────────────────────────────────────────
 
-function mergeAndRank() {
-  const visible = allArticles.filter(a => !a.hidden && passesFilters(a));
-  visible.sort((a, b) => {
-    const dateDiff = new Date(b.pubDate) - new Date(a.pubDate);
-    if (dateDiff !== 0) return dateDiff;
-    return getEffectiveHype(b) - getEffectiveHype(a);
-  });
+function updateFavCount() {
+  const count = loadBookmarks().size;
+  const el = document.getElementById('favCount');
+  if (el) el.textContent = count;
+}
 
-  const top15 = visible.slice(0, 15);
+function toggleFavoritesPanel() {
   const container = document.getElementById('resultsContainer');
-  const list = document.getElementById('resultsList');
+  const isVisible = container.classList.contains('visible');
 
-  if (top15.length === 0) {
-    list.innerHTML = '<div class="empty-state">Ingen nyheter å rangere</div>';
-  } else {
-    list.innerHTML = top15.map((art, i) => {
-      const rank = i + 1;
-      const score = getEffectiveHype(art);
-      let rankClass = '';
-      if (rank === 1) rankClass = 'gold';
-      else if (rank === 2) rankClass = 'silver';
-      else if (rank === 3) rankClass = 'bronze';
-
-      return `
-        <div class="result-item">
-          <div class="result-rank ${rankClass}">${rank}</div>
-          <div class="result-info">
-            <div class="result-title"><a href="${sanitizeUrl(art.link)}" target="_blank" rel="noopener noreferrer">${escapeHtml(art.title)}</a></div>
-            <div class="result-meta">${escapeHtml(art.source)} — ${formatDate(art.pubDate)}</div>
-          </div>
-          <div class="result-hype">
-            <span class="hype-badge ${hypeClass(score)}">${score}</span>
-          </div>
-        </div>`;
-    }).join('');
+  if (isVisible) {
+    container.classList.remove('visible');
+    return;
   }
 
+  renderFavorites();
   container.classList.add('visible');
 
-  // Smooth scroll to results
   setTimeout(() => {
     container.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }, 100);
+}
+
+function renderFavorites() {
+  const bookmarks = loadBookmarks();
+  const list = document.getElementById('resultsList');
+
+  if (bookmarks.size === 0) {
+    list.innerHTML = '<div class="favorites-empty">Ingen lagrede saker ennå.<br>Trykk ⭐ på en nyhet for å legge den til manuset.</div>';
+    updateFavCount();
+    return;
+  }
+
+  // Find matching articles, sorted newest first
+  const favArticles = allArticles
+    .filter(a => bookmarks.has(a.link.replace(/\/$/, '').toLowerCase()))
+    .sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+
+  if (favArticles.length === 0) {
+    list.innerHTML = '<div class="favorites-empty">Lagrede saker ble ikke funnet i gjeldende data.<br>De kan ha blitt eldre enn 30 dager.</div>';
+    updateFavCount();
+    return;
+  }
+
+  list.innerHTML = favArticles.map((art, i) => {
+    const score = getEffectiveHype(art);
+    const safeLink = sanitizeUrl(art.link);
+    const faviconUrl = getFaviconUrl(art.source);
+    const faviconImg = faviconUrl ? `<img style="width:14px;height:14px;border-radius:2px;vertical-align:middle;margin-right:4px;" src="${faviconUrl}" alt="">` : '';
+
+    return `
+      <div class="result-item">
+        <div class="result-rank" style="color: #ffd700;">${i + 1}</div>
+        <div class="result-info">
+          <div class="result-title"><a href="${safeLink}" target="_blank" rel="noopener noreferrer">${escapeHtml(art.title)}</a></div>
+          <div class="result-meta">${faviconImg}${escapeHtml(art.source)} — ${formatDate(art.pubDate)}</div>
+        </div>
+        <div class="result-actions">
+          <button class="result-action-btn" onclick="copyToClipboard('${escapeHtml(art.title).replace(/'/g, '\\&#39;')}', '${safeLink}')" title="Kopier">📋</button>
+          <button class="result-action-btn remove" onclick="removeFavorite('${safeLink}')" title="Fjern fra manus">✕</button>
+        </div>
+      </div>`;
+  }).join('');
+
+  updateFavCount();
+}
+
+function removeFavorite(link) {
+  const bookmarks = loadBookmarks();
+  const key = link.replace(/\/$/, '').toLowerCase();
+  bookmarks.delete(key);
+  saveBookmarks(bookmarks);
+
+  // Update star button in card if visible
+  const btn = document.querySelector(`[data-bookmark-link="${CSS.escape(key)}"]`);
+  if (btn) {
+    btn.classList.remove('bookmarked');
+    btn.title = 'Lagre til manus';
+  }
+
+  renderFavorites();
+}
+
+async function copyAllFavorites() {
+  const bookmarks = loadBookmarks();
+  const favArticles = allArticles
+    .filter(a => bookmarks.has(a.link.replace(/\/$/, '').toLowerCase()))
+    .sort((a, b) => new Date(b.pubDate) - new Date(a.pubDate));
+
+  if (favArticles.length === 0) return;
+
+  const text = favArticles.map((art, i) =>
+    `${i + 1}. ${art.title}\n   ${art.link}\n   ${art.source} — ${formatDate(art.pubDate)}`
+  ).join('\n\n');
+
+  try {
+    await navigator.clipboard.writeText(text);
+    alert('Alle favoritter kopiert til utklippstavlen!');
+  } catch {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    alert('Alle favoritter kopiert!');
+  }
+}
+
+function clearAllFavorites() {
+  if (!confirm('Er du sikker på at du vil tømme hele manuset?')) return;
+  saveBookmarks(new Set());
+  renderFavorites();
+  // Update all star buttons
+  document.querySelectorAll('.card-action-btn.bookmarked').forEach(btn => {
+    btn.classList.remove('bookmarked');
+    btn.title = 'Lagre til manus';
+  });
 }
 
 // ── MAIN INIT ───────────────────────────────────────────────────────
@@ -1743,6 +1851,7 @@ async function init() {
       `Sist oppdatert: ${now.toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' })}`;
 
     renderColumns();
+    updateFavCount();
   } catch (err) {
     console.error('Init error:', err);
     // Fallback: try showing cached articles if RSS fails
