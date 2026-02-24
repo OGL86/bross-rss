@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BRÅSS! Studio Radar</title>
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+      background: #121212;
+      color: #e0e0e0;
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    a { color: #fff; text-decoration: none; }
+    a:hover { color: #E60012; }
+
+    /* ===== HEADER ===== */
+    .header {
+      background: linear-gradient(135deg, #1a1a1a 0%, #0d0d0d 100%);
+      border-bottom: 3px solid #E60012;
+      padding: 1.2rem 2rem;
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header h1 {
+      font-size: 2.4rem;
+      font-weight: 900;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #fff;
+    }
+
+    .header h1 span.accent { color: #E60012; }
+
+    .header .subtitle {
+      font-size: 0.85rem;
+      color: #888;
+      margin-top: 0.2rem;
+      letter-spacing: 1px;
+    }
+
+    /* ===== LOADING / STATUS ===== */
+    .status-bar {
+      text-align: center;
+      padding: 0.8rem;
+      font-size: 0.85rem;
+      color: #888;
+    }
+
+    .status-bar.error { color: #ff5555; }
+
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid #444;
+      border-top-color: #E60012;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== GRID LAYOUT ===== */
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.2rem;
+      padding: 1.2rem 1.5rem;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    @media (max-width: 1100px) {
+      .grid-container { grid-template-columns: 1fr; }
+    }
+
+    .column {
+      background: #1a1a1a;
+      border-radius: 12px;
+      padding: 1rem;
+      min-height: 300px;
+    }
+
+    .column-header {
+      font-size: 1.1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding-bottom: 0.7rem;
+      margin-bottom: 0.8rem;
+      border-bottom: 2px solid #E60012;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .column-header .count {
+      background: #E60012;
+      color: #fff;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-left: auto;
+    }
+
+    /* ===== NEWS CARDS ===== */
+    .card {
+      background: #252525;
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+      margin-bottom: 0.7rem;
+      border-left: 3px solid #333;
+      transition: border-color 0.2s, transform 0.15s;
+    }
+
+    .card:hover {
+      border-left-color: #E60012;
+      transform: translateX(3px);
+    }
+
+    .card-title {
+      font-size: 0.92rem;
+      font-weight: 600;
+      line-height: 1.35;
+      margin-bottom: 0.35rem;
+    }
+
+    .card-title a:hover { text-decoration: underline; }
+
+    .card-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.75rem;
+      color: #999;
+      flex-wrap: wrap;
+    }
+
+    .card-source {
+      background: #333;
+      color: #ccc;
+      padding: 1px 7px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .card-date { color: #777; }
+
+    /* ===== HYPE SCORE ===== */
+    .hype-section {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.5rem;
+    }
+
+    .hype-badge {
+      font-weight: 800;
+      font-size: 0.85rem;
+      padding: 2px 10px;
+      border-radius: 6px;
+      min-width: 38px;
+      text-align: center;
+      color: #fff;
+      transition: background 0.2s;
+    }
+
+    .hype-low { background: #555; }
+    .hype-med { background: #b8860b; }
+    .hype-high { background: #c0392b; }
+    .hype-fire { background: #E60012; box-shadow: 0 0 8px rgba(230, 0, 18, 0.5); }
+
+    .hype-label {
+      font-size: 0.7rem;
+      color: #777;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .hype-btn {
+      background: #333;
+      color: #ccc;
+      border: none;
+      border-radius: 4px;
+      width: 26px;
+      height: 26px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s, color 0.15s;
+      line-height: 1;
+    }
+
+    .hype-btn:hover { background: #E60012; color: #fff; }
+
+    /* ===== MERGE BUTTON ===== */
+    .merge-section {
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+
+    .merge-btn {
+      background: #E60012;
+      color: #fff;
+      border: none;
+      padding: 1rem 2.5rem;
+      font-size: 1.25rem;
+      font-weight: 800;
+      border-radius: 12px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 4px 20px rgba(230, 0, 18, 0.4);
+    }
+
+    .merge-btn:hover {
+      transform: scale(1.04);
+      box-shadow: 0 6px 30px rgba(230, 0, 18, 0.6);
+    }
+
+    .merge-btn:active { transform: scale(0.97); }
+
+    /* ===== TOP 15 RESULTS ===== */
+    .results-container {
+      max-width: 900px;
+      margin: 0 auto 3rem;
+      padding: 0 1.5rem;
+      display: none;
+    }
+
+    .results-container.visible { display: block; }
+
+    .results-box {
+      background: linear-gradient(135deg, #1e1e1e 0%, #151515 100%);
+      border: 2px solid #E60012;
+      border-radius: 14px;
+      padding: 1.5rem;
+      animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .results-header {
+      font-size: 1.4rem;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 1.2rem;
+      color: #E60012;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+
+    .result-item {
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+      padding: 0.75rem 0.8rem;
+      border-bottom: 1px solid #2a2a2a;
+      transition: background 0.15s;
+    }
+
+    .result-item:hover { background: #252525; border-radius: 8px; }
+
+    .result-item:last-child { border-bottom: none; }
+
+    .result-rank {
+      font-size: 1.4rem;
+      font-weight: 900;
+      color: #E60012;
+      min-width: 36px;
+      text-align: center;
+    }
+
+    .result-rank.gold { color: #ffd700; }
+    .result-rank.silver { color: #c0c0c0; }
+    .result-rank.bronze { color: #cd7f32; }
+
+    .result-info { flex: 1; }
+
+    .result-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .result-meta {
+      font-size: 0.72rem;
+      color: #888;
+      margin-top: 0.15rem;
+    }
+
+    .result-hype {
+      font-size: 1.1rem;
+      font-weight: 800;
+      min-width: 40px;
+      text-align: center;
+    }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state {
+      text-align: center;
+      color: #555;
+      padding: 2rem 1rem;
+      font-size: 0.85rem;
+    }
+
+    /* ===== FILTER BAR ===== */
+    .filter-bar {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 0.6rem 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      align-items: center;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-group-label {
+      font-size: 0.7rem;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-right: 0.2rem;
+      white-space: nowrap;
+    }
+
+    .filter-chip {
+      background: #2a2a2a;
+      color: #888;
+      border: 1px solid #333;
+      padding: 3px 10px;
+      border-radius: 14px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .filter-chip:hover { border-color: #E60012; color: #ccc; }
+
+    .filter-chip.active {
+      background: #E60012;
+      color: #fff;
+      border-color: #E60012;
+    }
+
+    .filter-divider {
+      width: 1px;
+      height: 20px;
+      background: #333;
+      margin: 0 0.3rem;
+    }
+
+    /* ===== CATEGORY TAGS ===== */
+    .card-category {
+      font-size: 0.65rem;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .cat-nyheter    { background: #2a4a6b; color: #8ac4ff; }
+    .cat-rykter     { background: #6b3a2a; color: #ffb088; }
+    .cat-anmeldelse { background: #2a6b3a; color: #88ffaa; }
+    .cat-utgivelse  { background: #5a2a6b; color: #d088ff; }
+    .cat-hardware   { background: #6b6b2a; color: #ffffaa; }
+    .cat-bransje    { background: #2a5a5a; color: #88eeee; }
+    .cat-salg       { background: #6b2a4a; color: #ff88bb; }
+    .cat-video      { background: #4a2a2a; color: #ff8888; }
+
+    /* ===== FEED STATUS ===== */
+    .feed-status-toggle {
+      background: none;
+      border: 1px solid #333;
+      color: #666;
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 0.7rem;
+      cursor: pointer;
+      margin-left: auto;
+    }
+
+    .feed-status-toggle:hover { color: #ccc; border-color: #555; }
+
+    .feed-status-panel {
+      max-width: 1600px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+      display: none;
+    }
+
+    .feed-status-panel.visible { display: block; }
+
+    .feed-status-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.4rem;
+      padding: 0.5rem 0;
+    }
+
+    .feed-status-item {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.7rem;
+      color: #777;
+      padding: 3px 6px;
+      background: #1a1a1a;
+      border-radius: 4px;
+    }
+
+    .feed-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+
+    .feed-dot.ok { background: #4caf50; }
+    .feed-dot.fail { background: #f44336; }
+    .feed-dot.loading { background: #ffc107; animation: pulse 1s infinite; }
+
+    @keyframes pulse { 50% { opacity: 0.4; } }
+
+    .feed-count { color: #555; margin-left: auto; }
+
+    /* ===== VIS MER ===== */
+    .show-more-btn {
+      display: block;
+      width: 100%;
+      background: #1e1e1e;
+      border: 1px dashed #444;
+      color: #888;
+      padding: 0.5rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.78rem;
+      text-align: center;
+      margin-top: 0.4rem;
+      transition: all 0.15s;
+    }
+
+    .show-more-btn:hover { border-color: #E60012; color: #E60012; }
+
+    /* ===== LAST UPDATED / REFRESH ===== */
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      padding: 0.5rem 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .last-updated {
+      font-size: 0.75rem;
+      color: #555;
+    }
+
+    .refresh-btn {
+      background: #252525;
+      border: 1px solid #444;
+      color: #999;
+      padding: 3px 12px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .refresh-btn:hover { border-color: #E60012; color: #E60012; }
+    .refresh-btn.spinning { animation: spin 0.8s linear infinite; }
+
+    /* ===== SEARCH ===== */
+    .search-box {
+      background: #1e1e1e;
+      border: 1px solid #333;
+      color: #ccc;
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      width: 220px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .search-box:focus { border-color: #E60012; }
+    .search-box::placeholder { color: #555; }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #121212; }
+    ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #E60012; }
+
+    /* ===== FOOTER ===== */
+    .footer {
+      text-align: center;
+      padding: 1.5rem;
+      color: #444;
+      font-size: 0.75rem;
+      border-top: 1px solid #1e1e1e;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="header">
+    <h1><span class="accent">BRÅSS!</span> STUDIO RADAR</h1>
+    <div class="subtitle">Nintendo & Videospill Podcast — Live Nyhetsdashbord</div>
+  </header>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar" id="statusBar">
+    <span class="spinner"></span> Henter nyheter fra 20 kilder...
+  </div>
+
+  <!-- STATUS ROW: Last updated + refresh -->
+  <div class="status-row" id="statusRow" style="display:none;">
+    <span class="last-updated" id="lastUpdated"></span>
+    <button class="refresh-btn" id="refreshBtn" onclick="manualRefresh()">↻ Oppdater nå</button>
+    <input type="text" class="search-box" id="searchBox" placeholder="🔍 Søk i nyheter..." oninput="onSearchInput()">
+    <button class="feed-status-toggle" id="feedToggle" onclick="toggleFeedPanel()">Vis kildestatus</button>
+  </div>
+
+  <!-- FEED STATUS PANEL -->
+  <div class="feed-status-panel" id="feedStatusPanel">
+    <div class="feed-status-grid" id="feedStatusGrid"></div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar" id="filterBar" style="display:none;">
+    <div class="filter-group">
+      <span class="filter-group-label">Kilder:</span>
+      <button class="filter-chip active" data-filter-type="source-group" data-value="all" onclick="toggleSourceGroupFilter(this)">Alle</button>
+      <button class="filter-chip" data-filter-type="source-group" data-value="int" onclick="toggleSourceGroupFilter(this)">🌍 Internasjonale</button>
+      <button class="filter-chip" data-filter-type="source-group" data-value="no" onclick="toggleSourceGroupFilter(this)">🇳🇴 Norske</button>
+      <button class="filter-chip" data-filter-type="source-group" data-value="niche" onclick="toggleSourceGroupFilter(this)">🧩 Nisje</button>
+    </div>
+    <div class="filter-divider"></div>
+    <div class="filter-group">
+      <span class="filter-group-label">Kategori:</span>
+      <button class="filter-chip active" data-filter-type="category" data-value="all" onclick="toggleCategoryFilter(this)">Alle</button>
+      <button class="filter-chip" data-filter-type="category" data-value="rykter" onclick="toggleCategoryFilter(this)">🔥 Rykter</button>
+      <button class="filter-chip" data-filter-type="category" data-value="anmeldelse" onclick="toggleCategoryFilter(this)">⭐ Anmeldelser</button>
+      <button class="filter-chip" data-filter-type="category" data-value="utgivelse" onclick="toggleCategoryFilter(this)">🎮 Utgivelser</button>
+      <button class="filter-chip" data-filter-type="category" data-value="hardware" onclick="toggleCategoryFilter(this)">🔧 Hardware</button>
+      <button class="filter-chip" data-filter-type="category" data-value="bransje" onclick="toggleCategoryFilter(this)">📊 Bransje</button>
+      <button class="filter-chip" data-filter-type="category" data-value="salg" onclick="toggleCategoryFilter(this)">💰 Salg</button>
+    </div>
+  </div>
+
+  <!-- THREE-COLUMN GRID -->
+  <div class="grid-container" id="gridContainer">
+    <div class="column" id="colToday">
+      <div class="column-header">
+        🔴 Dagens <small>(siste 24t)</small>
+        <span class="count" id="countToday">0</span>
+      </div>
+      <div class="card-list" id="listToday"></div>
+    </div>
+    <div class="column" id="colWeek">
+      <div class="column-header">
+        📰 Ukens <small>(siste 7 dager)</small>
+        <span class="count" id="countWeek">0</span>
+      </div>
+      <div class="card-list" id="listWeek"></div>
+    </div>
+    <div class="column" id="colMonth">
+      <div class="column-header">
+        📅 Månedens <small>(siste 30 dager)</small>
+        <span class="count" id="countMonth">0</span>
+      </div>
+      <div class="card-list" id="listMonth"></div>
+    </div>
+  </div>
+
+  <!-- MERGE BUTTON -->
+  <div class="merge-section">
+    <button class="merge-btn" id="mergeBtn" onclick="mergeAndRank()">
+      Slå sammen og ranger etter Hype! 🔥
+    </button>
+  </div>
+
+  <!-- TOP 15 RESULTS -->
+  <div class="results-container" id="resultsContainer">
+    <div class="results-box">
+      <div class="results-header">🔥 Topp 15 — Hypede Nyheter 🔥</div>
+      <div id="resultsList"></div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    BRÅSS! Studio Radar &mdash; Gratis verktøy for podcast-produksjon &mdash; Drevet av RSS &amp; Vanilla JS
+    <br>
+    <button onclick="clearCache()" style="margin-top:0.5rem;background:#333;color:#999;border:1px solid #444;padding:4px 14px;border-radius:6px;cursor:pointer;font-size:0.72rem;"
+      title="Sletter alle lagrede nyheter fra nettleseren">🗑️ Tøm lokal cache</button>
+  </div>
+
+<script>
+/* ====================================================================
+   BRÅSS! STUDIO RADAR — Full SPA Logic
+   ==================================================================== */
+
+// ── CONFIG ──────────────────────────────────────────────────────────
+const RSS_FEEDS = [
+  // 🔴 Internasjonale (topp 10)
+  { url: 'https://www.nintendolife.com/feeds/latest', name: 'Nintendo Life', group: 'int' },
+  { url: 'https://nintendoeverything.com/feed/', name: 'Nintendo Everything', group: 'int' },
+  { url: 'https://www.videogameschronicle.com/feed/', name: 'VGC', group: 'int' },
+  { url: 'https://www.eurogamer.net/feed/nintendo', name: 'Eurogamer', group: 'int' },
+  { url: 'https://www.ign.com/rss/articles/nintendo', name: 'IGN', group: 'int' },
+  { url: 'https://www.gematsu.com/feed', name: 'Gematsu', group: 'int' },
+  { url: 'https://gonintendo.com/feed', name: 'GoNintendo', group: 'int' },
+  { url: 'https://kotaku.com/rss', name: 'Kotaku', group: 'int' },
+  { url: 'https://www.gamesindustry.biz/rss', name: 'GamesIndustry.biz', group: 'int' },
+  { url: 'https://www.polygon.com/rss/index.xml', name: 'Polygon', group: 'int' },
+  // 🇳🇴 Norske (5)
+  { url: 'https://www.pressfire.no/rss', name: 'Pressfire.no', group: 'no' },
+  { url: 'https://www.gamer.no/feeds/general.xml', name: 'Gamer.no', group: 'no' },
+  { url: 'https://www.gamereactor.no/rss/rss.php', name: 'Gamereactor NO', group: 'no' },
+  { url: 'https://itavisen.no/kategori/spill/feed/', name: 'ITavisen', group: 'no' },
+  { url: 'https://www.youtube.com/feeds/videos.xml?channel_id=UCv_9_p_pS06Yv_3_n4f47pA', name: 'Level Up Norge', group: 'no' },
+  // 🧩 Nisje-kilder (5)
+  { url: 'https://nintendo.com/whatsnew/rss', name: 'Nintendo Offisiell', group: 'niche' },
+  { url: 'https://www.destructoid.com/feed/', name: 'Destructoid', group: 'niche' },
+  { url: 'https://www.siliconera.com/feed/', name: 'Siliconera', group: 'niche' },
+  { url: 'https://www.theverge.com/games/rss/index.xml', name: 'The Verge', group: 'niche' },
+  { url: 'https://www.pocketgamer.com/rss/', name: 'Pocket Gamer', group: 'niche' },
+];
+
+const RSS2JSON_BASE = 'https://api.rss2json.com/v1/api.json?rss_url=';
+
+// Hype keywords: [pattern, scoreDelta]
+const HYPE_POSITIVE = [
+  [/switch\s*2/i, 3],
+  [/zelda/i, 2],
+  [/mario/i, 2],
+  [/direct/i, 2],
+  [/leak/i, 2],
+  [/review/i, 1],
+  [/metroid/i, 2],
+  [/smash/i, 1],
+  [/pokemon|pokémon/i, 2],
+  [/exclusive/i, 1],
+  [/announce|reveal/i, 1],
+  [/goty|game of the year/i, 1],
+];
+
+const HYPE_NEGATIVE = [
+  [/update/i, -1],
+  [/patch/i, -1],
+  [/maintenance/i, -2],
+  [/server/i, -1],
+];
+
+// Article category detection rules: [regex, category]
+const CATEGORY_RULES = [
+  [/leak|rumou?r|reportedly|insider|datamin/i, 'rykter'],
+  [/review|\d+\/10|score[ds]?|rated|verdict/i, 'anmeldelse'],
+  [/release|launch|coming|out now|available now|trailer|announce|reveal/i, 'utgivelse'],
+  [/switch\s*2|hardware|console|specs|teardown|controller|joy.?con/i, 'hardware'],
+  [/sale|deal|discount|price|offer|eshop sale|free-to|free to play/i, 'salg'],
+  [/million|billion|revenue|NPD|chart|sales figures|financial|stock|shares|market/i, 'bransje'],
+];
+
+// Category display info
+const CATEGORY_INFO = {
+  nyheter:    { label: '📰 Nyheter',    css: 'cat-nyheter' },
+  rykter:     { label: '🔥 Rykter',     css: 'cat-rykter' },
+  anmeldelse: { label: '⭐ Anmeldelse', css: 'cat-anmeldelse' },
+  utgivelse:  { label: '🎮 Utgivelse',  css: 'cat-utgivelse' },
+  hardware:   { label: '🔧 Hardware',   css: 'cat-hardware' },
+  bransje:    { label: '📊 Bransje',    css: 'cat-bransje' },
+  salg:       { label: '💰 Salg',       css: 'cat-salg' },
+  video:      { label: '🎬 Video',      css: 'cat-video' },
+};
+
+// Jaccard duplicate threshold
+const JACCARD_THRESHOLD = 0.45;
+
+// localStorage key
+const STORAGE_KEY = 'brass_radar_articles';
+const STORAGE_MAX_AGE_DAYS = 30;
+
+// ── STATE ───────────────────────────────────────────────────────────
+let allArticles = []; // master array of article objects
+let feedStatus = {};  // { feedName: { status: 'ok'|'fail'|'loading', count: 0 } }
+let activeSourceGroup = 'all'; // 'all' | 'int' | 'no' | 'niche'
+let activeCategory = 'all';    // 'all' | 'rykter' | 'anmeldelse' | etc.
+let searchQuery = '';           // current search text
+let showMoreState = { today: false, week: false, month: false };
+const INITIAL_SHOW_COUNT = 8;
+
+// ── LOCAL STORAGE (CACHE) ───────────────────────────────────────────
+
+/** Save articles to localStorage (strips hidden flag, re-applied on load) */
+function saveToCache(articles) {
+  try {
+    const toStore = articles.map(a => ({
+      title: a.title,
+      link: a.link,
+      pubDate: a.pubDate,
+      source: a.source,
+      sourceGroup: a.sourceGroup,
+      category: a.category,
+      autoHype: a.autoHype,
+      manualHype: a.manualHype,
+    }));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(toStore));
+  } catch (e) {
+    console.warn('Kunne ikke lagre til localStorage:', e);
+  }
+}
+
+/** Load cached articles from localStorage */
+function loadFromCache() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map(a => ({
+      id: uid(),
+      title: a.title || '',
+      link: a.link || '#',
+      pubDate: a.pubDate || '',
+      source: a.source || 'Ukjent',
+      sourceGroup: a.sourceGroup || 'int',
+      category: a.category || detectCategory(a.title || '', a.source || ''),
+      autoHype: a.autoHype || 3,
+      manualHype: a.manualHype ?? null,
+      hidden: false,
+    }));
+  } catch (e) {
+    console.warn('Kunne ikke lese fra localStorage:', e);
+    return [];
+  }
+}
+
+/** Remove articles older than STORAGE_MAX_AGE_DAYS */
+function purgeOldArticles(articles) {
+  const cutoff = Date.now() - (STORAGE_MAX_AGE_DAYS * 24 * 60 * 60 * 1000);
+  return articles.filter(a => {
+    const pub = new Date(a.pubDate).getTime();
+    if (!pub || isNaN(pub)) return true; // keep if no date
+    return pub >= cutoff;
+  });
+}
+
+/** Merge new RSS articles with cached ones (dedupe by link) */
+function mergeWithCache(freshArticles, cachedArticles) {
+  const seenLinks = new Set();
+  const merged = [];
+
+  // Fresh articles take priority
+  for (const art of freshArticles) {
+    const key = art.link.replace(/\/$/, '').toLowerCase();
+    if (!seenLinks.has(key)) {
+      seenLinks.add(key);
+      // Preserve manual hype from cache if same article
+      const cached = cachedArticles.find(c => c.link.replace(/\/$/, '').toLowerCase() === key);
+      if (cached && cached.manualHype !== null) {
+        art.manualHype = cached.manualHype;
+      }
+      merged.push(art);
+    }
+  }
+
+  // Add cached articles that are NOT in fresh results
+  for (const art of cachedArticles) {
+    const key = art.link.replace(/\/$/, '').toLowerCase();
+    if (!seenLinks.has(key)) {
+      seenLinks.add(key);
+      merged.push(art);
+    }
+  }
+
+  return merged;
+}
+
+/** Clear the cache */
+function clearCache() {
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+
+// ── UTILITY FUNCTIONS ───────────────────────────────────────────────
+
+/** Clamp number between min and max */
+function clamp(val, min, max) {
+  return Math.max(min, Math.min(max, val));
+}
+
+/** Calculate auto Hype Score for an article title */
+function calcAutoHype(title) {
+  let score = 3;
+  for (const [regex, delta] of HYPE_POSITIVE) {
+    if (regex.test(title)) score += delta;
+  }
+  for (const [regex, delta] of HYPE_NEGATIVE) {
+    if (regex.test(title)) score += delta; // delta is already negative
+  }
+  return clamp(score, 1, 10);
+}
+
+/** Detect article category from title */
+function detectCategory(title, source) {
+  // YouTube sources are always 'video'
+  if (source === 'Level Up Norge') return 'video';
+  for (const [regex, cat] of CATEGORY_RULES) {
+    if (regex.test(title)) return cat;
+  }
+  return 'nyheter'; // default
+}
+
+/** Get the CSS class for a hype score badge */
+function hypeClass(score) {
+  if (score >= 8) return 'hype-fire';
+  if (score >= 6) return 'hype-high';
+  if (score >= 4) return 'hype-med';
+  return 'hype-low';
+}
+
+/** Normalize a title into a set of unique lowercase words (for Jaccard) */
+function wordSet(title) {
+  const words = title
+    .toLowerCase()
+    .replace(/[^a-zæøå0-9\s]/gi, '')
+    .split(/\s+/)
+    .filter(w => w.length > 2); // ignore very short words
+  return new Set(words);
+}
+
+/** Jaccard similarity between two word sets */
+function jaccard(setA, setB) {
+  if (setA.size === 0 && setB.size === 0) return 0;
+  let intersection = 0;
+  for (const w of setA) {
+    if (setB.has(w)) intersection++;
+  }
+  const union = setA.size + setB.size - intersection;
+  return union === 0 ? 0 : intersection / union;
+}
+
+/** Time category: 'today' | 'week' | 'month' | 'old' */
+function timeCategory(pubDate) {
+  const now = Date.now();
+  const pub = new Date(pubDate).getTime();
+
+  // If date is invalid/missing, put in 'month' as fallback so it still shows up
+  if (!pub || isNaN(pub)) return 'month';
+
+  const diffMs = now - pub;
+  const diffHours = diffMs / (1000 * 60 * 60);
+
+  // Future dates (can happen with timezone issues) → treat as today
+  if (diffHours < 0) return 'today';
+  if (diffHours <= 24) return 'today';
+  if (diffHours <= 24 * 7) return 'week';
+  if (diffHours <= 24 * 30) return 'month';
+  return 'old';
+}
+
+/** Format a date nicely */
+function formatDate(dateStr) {
+  try {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('nb-NO', {
+      day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+  } catch {
+    return dateStr;
+  }
+}
+
+/** Generate a unique ID */
+let _idCounter = 0;
+function uid() { return 'art_' + (++_idCounter); }
+
+// ── RSS FETCHING ────────────────────────────────────────────────────
+
+async function fetchFeed(feed) {
+  const url = RSS2JSON_BASE + encodeURIComponent(feed.url);
+  try {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (data.status !== 'ok') throw new Error(data.message || 'RSS Parse Error');
+
+    return (data.items || []).map(item => ({
+      id: uid(),
+      title: (item.title || '').trim(),
+      link: item.link || '#',
+      pubDate: item.pubDate || '',
+      source: feed.name,
+      sourceGroup: feed.group,
+      category: detectCategory(item.title || '', feed.name),
+      autoHype: calcAutoHype(item.title || ''),
+      manualHype: null, // null = use autoHype
+      hidden: false,
+    }));
+  } catch (err) {
+    console.warn(`Feil ved henting av ${feed.name}:`, err);
+    return [];
+  }
+}
+
+/** Throttled fetch: sequential with 300ms delay to avoid rss2json rate limits */
+async function fetchAllFeeds() {
+  const allResults = [];
+  feedStatus = {};
+
+  // Initialize all as loading
+  for (const feed of RSS_FEEDS) {
+    feedStatus[feed.name] = { status: 'loading', count: 0 };
+  }
+  renderFeedStatus();
+
+  // Fetch in small batches of 4 with delay between batches
+  const BATCH_SIZE = 4;
+  const BATCH_DELAY = 400; // ms between batches
+
+  for (let i = 0; i < RSS_FEEDS.length; i += BATCH_SIZE) {
+    const batch = RSS_FEEDS.slice(i, i + BATCH_SIZE);
+    const batchResults = await Promise.all(batch.map(async (feed) => {
+      try {
+        const items = await fetchFeed(feed);
+        feedStatus[feed.name] = { status: 'ok', count: items.length };
+        renderFeedStatus();
+        return items;
+      } catch (err) {
+        feedStatus[feed.name] = { status: 'fail', count: 0 };
+        renderFeedStatus();
+        return [];
+      }
+    }));
+    allResults.push(...batchResults.flat());
+
+    // Delay before next batch (skip after last batch)
+    if (i + BATCH_SIZE < RSS_FEEDS.length) {
+      await new Promise(r => setTimeout(r, BATCH_DELAY));
+    }
+  }
+
+  return allResults;
+}
+
+/** Render the feed status indicators */
+function renderFeedStatus() {
+  const grid = document.getElementById('feedStatusGrid');
+  if (!grid) return;
+  grid.innerHTML = RSS_FEEDS.map(feed => {
+    const s = feedStatus[feed.name] || { status: 'loading', count: 0 };
+    return `<div class="feed-status-item">
+      <span class="feed-dot ${s.status}"></span>
+      <span>${feed.name}</span>
+      <span class="feed-count">${s.status === 'ok' ? s.count + ' saker' : s.status === 'fail' ? 'feilet' : '...'}</span>
+    </div>`;
+  }).join('');
+}
+
+// ── DUPLICATE REMOVAL ───────────────────────────────────────────────
+
+function removeDuplicates(articles) {
+  // Precompute word sets
+  const sets = articles.map(a => ({ article: a, ws: wordSet(a.title) }));
+
+  // Mark duplicates
+  for (let i = 0; i < sets.length; i++) {
+    if (sets[i].article.hidden) continue;
+    for (let j = i + 1; j < sets.length; j++) {
+      if (sets[j].article.hidden) continue;
+      // Only check across different sources
+      if (sets[i].article.source === sets[j].article.source) continue;
+
+      const sim = jaccard(sets[i].ws, sets[j].ws);
+      if (sim >= JACCARD_THRESHOLD) {
+        // Keep the one with highest hype, or the newest
+        const scoreI = sets[i].article.autoHype;
+        const scoreJ = sets[j].article.autoHype;
+        if (scoreI > scoreJ) {
+          sets[j].article.hidden = true;
+        } else if (scoreJ > scoreI) {
+          sets[i].article.hidden = true;
+        } else {
+          // Same score → keep newest
+          const dateI = new Date(sets[i].article.pubDate).getTime() || 0;
+          const dateJ = new Date(sets[j].article.pubDate).getTime() || 0;
+          if (dateI >= dateJ) {
+            sets[j].article.hidden = true;
+          } else {
+            sets[i].article.hidden = true;
+          }
+        }
+      }
+    }
+  }
+
+  return articles;
+}
+
+// ── RENDERING ───────────────────────────────────────────────────────
+
+function getEffectiveHype(article) {
+  return article.manualHype !== null ? article.manualHype : article.autoHype;
+}
+
+function renderCard(article) {
+  const score = getEffectiveHype(article);
+  const badgeClass = hypeClass(score);
+  const catInfo = CATEGORY_INFO[article.category] || CATEGORY_INFO.nyheter;
+  return `
+    <div class="card" id="${article.id}">
+      <div class="card-title"><a href="${article.link}" target="_blank" rel="noopener">${escapeHtml(article.title)}</a></div>
+      <div class="card-meta">
+        <span class="card-source">${escapeHtml(article.source)}</span>
+        <span class="card-category ${catInfo.css}">${catInfo.label}</span>
+        <span class="card-date">${formatDate(article.pubDate)}</span>
+      </div>
+      <div class="hype-section">
+        <span class="hype-label">Hype:</span>
+        <button class="hype-btn" onclick="adjustHype('${article.id}', -1)" aria-label="Senk hype">−</button>
+        <span class="hype-badge ${badgeClass}" id="badge_${article.id}">${score}</span>
+        <button class="hype-btn" onclick="adjustHype('${article.id}', 1)" aria-label="Øk hype">+</button>
+      </div>
+    </div>`;
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function renderColumns() {
+  const todayList = [];
+  const weekList = [];
+  const monthList = [];
+
+  for (const art of allArticles) {
+    if (art.hidden) continue;
+    const cat = timeCategory(art.pubDate);
+    if (cat === 'today') todayList.push(art);
+    else if (cat === 'week') weekList.push(art);
+    else if (cat === 'month') monthList.push(art);
+    // 'old' articles are silently omitted
+  }
+
+  // Sort each bucket: highest hype first, then newest
+  const sorter = (a, b) => {
+    const diff = getEffectiveHype(b) - getEffectiveHype(a);
+    if (diff !== 0) return diff;
+    return new Date(b.pubDate) - new Date(a.pubDate);
+  };
+
+  todayList.sort(sorter);
+  weekList.sort(sorter);
+  monthList.sort(sorter);
+
+  document.getElementById('listToday').innerHTML =
+    todayList.length ? todayList.map(renderCard).join('') : '<div class="empty-state">Ingen nyheter siste 24 timer</div>';
+  document.getElementById('listWeek').innerHTML =
+    weekList.length ? weekList.map(renderCard).join('') : '<div class="empty-state">Ingen nyheter denne uken</div>';
+  document.getElementById('listMonth').innerHTML =
+    monthList.length ? monthList.map(renderCard).join('') : '<div class="empty-state">Ingen nyheter denne måneden</div>';
+
+  document.getElementById('countToday').textContent = todayList.length;
+  document.getElementById('countWeek').textContent = weekList.length;
+  document.getElementById('countMonth').textContent = monthList.length;
+}
+
+// ── MANUAL HYPE ADJUSTMENT ──────────────────────────────────────────
+
+function adjustHype(articleId, delta) {
+  const art = allArticles.find(a => a.id === articleId);
+  if (!art) return;
+
+  const current = getEffectiveHype(art);
+  const newScore = clamp(current + delta, 1, 10);
+  art.manualHype = newScore;
+
+  // Persist to cache
+  saveToCache(allArticles);
+
+  // Update badge in-place (no full re-render)
+  const badge = document.getElementById('badge_' + articleId);
+  if (badge) {
+    badge.textContent = newScore;
+    badge.className = 'hype-badge ' + hypeClass(newScore);
+  }
+}
+
+// ── FILTERING & SEARCH ──────────────────────────────────────────────
+
+function toggleSourceGroupFilter(btn) {
+  const value = btn.dataset.value;
+  activeSourceGroup = value;
+  // Update active state on chips
+  document.querySelectorAll('[data-filter-type="source-group"]').forEach(el => {
+    el.classList.toggle('active', el.dataset.value === value);
+  });
+  showMoreState = { today: false, week: false, month: false };
+  renderColumns();
+}
+
+function toggleCategoryFilter(btn) {
+  const value = btn.dataset.value;
+  activeCategory = value;
+  document.querySelectorAll('[data-filter-type="category"]').forEach(el => {
+    el.classList.toggle('active', el.dataset.value === value);
+  });
+  showMoreState = { today: false, week: false, month: false };
+  renderColumns();
+}
+
+let searchDebounce = null;
+function onSearchInput() {
+  clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(() => {
+    searchQuery = document.getElementById('searchBox').value;
+    showMoreState = { today: false, week: false, month: false };
+    renderColumns();
+  }, 250);
+}
+
+function toggleFeedPanel() {
+  const panel = document.getElementById('feedStatusPanel');
+  const btn = document.getElementById('feedToggle');
+  panel.classList.toggle('visible');
+  btn.textContent = panel.classList.contains('visible') ? 'Skjul kildestatus' : 'Vis kildestatus';
+}
+
+async function manualRefresh() {
+  const btn = document.getElementById('refreshBtn');
+  btn.classList.add('spinning');
+  btn.disabled = true;
+  await init();
+  btn.classList.remove('spinning');
+  btn.disabled = false;
+}
+
+// ── MERGE & RANK ────────────────────────────────────────────────────
+
+function mergeAndRank() {
+  const visible = allArticles.filter(a => !a.hidden);
+  visible.sort((a, b) => {
+    const diff = getEffectiveHype(b) - getEffectiveHype(a);
+    if (diff !== 0) return diff;
+    return new Date(b.pubDate) - new Date(a.pubDate);
+  });
+
+  const top15 = visible.slice(0, 15);
+  const container = document.getElementById('resultsContainer');
+  const list = document.getElementById('resultsList');
+
+  if (top15.length === 0) {
+    list.innerHTML = '<div class="empty-state">Ingen nyheter å rangere</div>';
+  } else {
+    list.innerHTML = top15.map((art, i) => {
+      const rank = i + 1;
+      const score = getEffectiveHype(art);
+      let rankClass = '';
+      if (rank === 1) rankClass = 'gold';
+      else if (rank === 2) rankClass = 'silver';
+      else if (rank === 3) rankClass = 'bronze';
+
+      return `
+        <div class="result-item">
+          <div class="result-rank ${rankClass}">${rank}</div>
+          <div class="result-info">
+            <div class="result-title"><a href="${art.link}" target="_blank" rel="noopener">${escapeHtml(art.title)}</a></div>
+            <div class="result-meta">${escapeHtml(art.source)} — ${formatDate(art.pubDate)}</div>
+          </div>
+          <div class="result-hype">
+            <span class="hype-badge ${hypeClass(score)}">${score}</span>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  container.classList.add('visible');
+
+  // Smooth scroll to results
+  setTimeout(() => {
+    container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 100);
+}
+
+// ── MAIN INIT ───────────────────────────────────────────────────────
+
+async function init() {
+  const statusBar = document.getElementById('statusBar');
+
+  try {
+    // 1. Load cached articles
+    const cached = loadFromCache();
+    const cachedCount = cached.length;
+
+    // 2. Fetch fresh articles from RSS (throttled)
+    const fresh = await fetchAllFeeds();
+
+    // 3. Merge fresh + cached (fresh wins on duplicates, preserves manual hype)
+    let merged = mergeWithCache(fresh, cached);
+
+    // 4. Purge articles older than 30 days
+    merged = purgeOldArticles(merged);
+
+    // 5. Run duplicate detection
+    allArticles = removeDuplicates(merged);
+
+    // 6. Save merged result back to cache
+    saveToCache(allArticles);
+
+    const visibleCount = allArticles.filter(a => !a.hidden).length;
+    const dupeCount = allArticles.filter(a => a.hidden).length;
+    const failedFeeds = Object.values(feedStatus).filter(s => s.status === 'fail').length;
+
+    let statusHtml = `✅ <strong>${visibleCount}</strong> nyheter fra ${RSS_FEEDS.length} kilder`;
+    statusHtml += ` (${fresh.length} nye + ${cachedCount} fra cache)`;
+    if (dupeCount > 0) statusHtml += ` — <span style="color:#E60012">${dupeCount} duplikater fjernet</span>`;
+    if (failedFeeds > 0) statusHtml += ` — <span style="color:#ffc107">${failedFeeds} kilder feilet</span>`;
+    statusBar.innerHTML = statusHtml;
+
+    // Show controls
+    document.getElementById('statusRow').style.display = 'flex';
+    document.getElementById('filterBar').style.display = 'flex';
+
+    // Update timestamp
+    const now = new Date();
+    document.getElementById('lastUpdated').textContent =
+      `Sist oppdatert: ${now.toLocaleTimeString('nb-NO', { hour: '2-digit', minute: '2-digit' })}`;
+
+    renderColumns();
+  } catch (err) {
+    console.error('Init error:', err);
+    // Fallback: try showing cached articles if RSS fails
+    const cached = loadFromCache();
+    if (cached.length > 0) {
+      allArticles = removeDuplicates(cached);
+      renderColumns();
+      document.getElementById('statusRow').style.display = 'flex';
+      document.getElementById('filterBar').style.display = 'flex';
+      statusBar.className = 'status-bar error';
+      statusBar.innerHTML = `⚠️ RSS-henting feilet — viser <strong>${cached.length}</strong> lagrede nyheter fra cache`;
+    } else {
+      statusBar.className = 'status-bar error';
+      statusBar.textContent = '❌ Feil ved lasting av nyheter. Sjekk internettforbindelsen.';
+    }
+  }
+}
+
+// Go!
+init();
+</script>
+
+</body>
+</html>
