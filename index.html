@@ -651,7 +651,9 @@
     }
 
     .card-action-btn:hover { color: var(--accent); border-color: #444; }
-    .card-action-btn.bookmarked { color: #ffd700; }
+    .card-action-btn.bookmark-star { color: #555; font-size: 1.05rem; }
+    .card-action-btn.bookmark-star:hover { color: #ffd700; }
+    .card-action-btn.bookmark-star.bookmarked { color: #ffd700; }
     .card-action-btn.copied { color: #4caf50; }
 
     /* ===== SEARCH HIGHLIGHT ===== */
@@ -1360,8 +1362,10 @@ function toggleBookmark(articleLink) {
   // Update button in-place
   const btn = document.querySelector(`[data-bookmark-link="${CSS.escape(key)}"]`);
   if (btn) {
-    btn.classList.toggle('bookmarked', bookmarks.has(key));
-    btn.title = bookmarks.has(key) ? 'Fjern fra manus' : 'Lagre til manus';
+    const isFav = bookmarks.has(key);
+    btn.classList.toggle('bookmarked', isFav);
+    btn.textContent = isFav ? '★' : '☆';
+    btn.title = isFav ? 'Fjern fra manus' : 'Lagre til manus';
   }
   updateFavCount();
   // If favorites panel is open, refresh it
@@ -1484,7 +1488,7 @@ function renderCard(article) {
           <span class="hype-badge ${badgeClass}" id="badge_${article.id}">${score}</span>
           <button class="hype-btn" onclick="adjustHype('${article.id}', 1)" aria-label="Øk hype">+</button>
           <div class="card-actions">
-            <button class="card-action-btn${bookmarked ? ' bookmarked' : ''}" data-bookmark-link="${bookmarkKey}" onclick="toggleBookmark('${safeLink}')" title="${bookmarked ? 'Fjern bokmerke' : 'Lagre til manus'}" aria-label="Bokmerke">⭐</button>
+            <button class="card-action-btn bookmark-star${bookmarked ? ' bookmarked' : ''}" data-bookmark-link="${bookmarkKey}" onclick="toggleBookmark('${safeLink}')" title="${bookmarked ? 'Fjern fra manus' : 'Lagre til manus'}" aria-label="Bokmerke">${bookmarked ? '★' : '☆'}</button>
             <button class="card-action-btn" onclick="copyToClipboard('${escapeHtml(article.title).replace(/'/g, '\\&#39;')}', '${safeLink}')" title="Kopier til manus" aria-label="Kopier">📋</button>
           </div>
         </div>
@@ -1763,6 +1767,7 @@ function removeFavorite(link) {
   const btn = document.querySelector(`[data-bookmark-link="${CSS.escape(key)}"]`);
   if (btn) {
     btn.classList.remove('bookmarked');
+    btn.textContent = '☆';
     btn.title = 'Lagre til manus';
   }
 
@@ -1802,6 +1807,7 @@ function clearAllFavorites() {
   // Update all star buttons
   document.querySelectorAll('.card-action-btn.bookmarked').forEach(btn => {
     btn.classList.remove('bookmarked');
+    btn.textContent = '☆';
     btn.title = 'Lagre til manus';
   });
 }
